@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Business Card 3D Viewer</title>
+  <title>Kad Perniagaan Interaktif</title>
   <style>
     body {
       margin: 0;
@@ -56,9 +56,9 @@
     }
 
     .front {
-      background: linear-gradient(45deg, #ff99cc, #ff66b3);
+      background: white;
       color: white;
-      padding: 20px;
+      padding: 0;
       box-sizing: border-box;
     }
 
@@ -113,10 +113,17 @@
   <div class="card-container">
     <div class="business-card" id="card">
       <div class="card-side front">
-        <div class="logo" style="background-image: url('40ddeaec-60a4-4a31-a3f3-c94aeaf640bd.jpeg');"></div>
+        <div class="logo" style="background-image: url('/mnt/data/CE6EDB50-2127-45AA-8BE7-14DE5F9DBF1E.png');"></div>
       </div>
       <div class="card-side back">
-        <div class="logo" style="background-image: url('bb543cb4-eb98-4179-ae5b-33fb65be6d23.jpeg');"></div>
+        <div class="contact">
+          <div class="name">Nama Penuh Anda</div>
+          <div class="title">Jawatan</div>
+          <div class="info">
+            Emel: contoh@email.com<br/>
+            Telefon: 012-3456789
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -137,7 +144,6 @@
     let previousX, previousY;
     let rotationX = 0, rotationY = 0;
 
-    // Drag manual rotation
     card.addEventListener('mousedown', (e) => {
       isDragging = true;
       previousX = e.clientX;
@@ -163,7 +169,6 @@
       isDragging = false;
     });
 
-    // Touch support
     card.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       isDragging = true;
@@ -193,7 +198,6 @@
       isDragging = false;
     });
 
-    // Flip button
     flipCardBtn.addEventListener('click', () => {
       card.classList.toggle('flipped');
     });
