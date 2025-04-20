@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -49,33 +49,24 @@
       backface-visibility: hidden;
       border-radius: 10px;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      overflow: hidden;
     }
 
-    .front {
+    .front, .back {
       background: white;
-      color: white;
-      padding: 0;
-      box-sizing: border-box;
     }
 
     .back {
-      background: white;
-      color: #333;
       transform: rotateY(180deg);
-      padding: 20px;
-      box-sizing: border-box;
     }
 
     .logo {
       width: 100%;
       height: 100%;
-      background-size: cover;
-      background-position: center;
-      border-radius: 10px;
+      object-fit: cover;
     }
 
     .controls {
@@ -113,17 +104,10 @@
   <div class="card-container">
     <div class="business-card" id="card">
       <div class="card-side front">
-        <div class="logo" style="background-image: url('/mnt/data/CE6EDB50-2127-45AA-8BE7-14DE5F9DBF1E.png');"></div>
+        <img class="logo" src="40ddeaec-60a4-4a31-a3f3-c94aeaf640bd.jpeg" alt="Kad Depan"/>
       </div>
       <div class="card-side back">
-        <div class="contact">
-          <div class="name">Nama Penuh Anda</div>
-          <div class="title">Jawatan</div>
-          <div class="info">
-            Emel: contoh@email.com<br/>
-            Telefon: 012-3456789
-          </div>
-        </div>
+        <img class="logo" src="bb543cb4-eb98-4179-ae5b-33fb65be6d23.jpeg" alt="Kad Belakang"/>
       </div>
     </div>
   </div>
@@ -133,13 +117,18 @@
   </div>
 
   <div class="instructions">
-    <p>Seret kad dengan tetikus untuk putaran manual, atau klik butang untuk flip automatik.</p>
+    <p>Seret kad dengan tetikus untuk putaran manual.</p>
   </div>
 
   <script>
     const card = document.getElementById('card');
     const flipCardBtn = document.getElementById('flip-card');
-    
+
+    flipCardBtn.addEventListener('click', () => {
+      card.classList.toggle('flipped');
+    });
+
+    // Manual rotate
     let isDragging = false;
     let previousX, previousY;
     let rotationX = 0, rotationY = 0;
@@ -154,12 +143,9 @@
       if (isDragging) {
         const deltaX = e.clientX - previousX;
         const deltaY = e.clientY - previousY;
-
         rotationY += deltaX * 0.5;
         rotationX -= deltaY * 0.5;
-
         card.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-
         previousX = e.clientX;
         previousY = e.clientY;
       }
@@ -167,39 +153,6 @@
 
     document.addEventListener('mouseup', () => {
       isDragging = false;
-    });
-
-    card.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      isDragging = true;
-      previousX = touch.clientX;
-      previousY = touch.clientY;
-      e.preventDefault();
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      if (isDragging) {
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - previousX;
-        const deltaY = touch.clientY - previousY;
-
-        rotationY += deltaX * 0.5;
-        rotationX -= deltaY * 0.5;
-
-        card.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-
-        previousX = touch.clientX;
-        previousY = touch.clientY;
-        e.preventDefault();
-      }
-    });
-
-    document.addEventListener('touchend', () => {
-      isDragging = false;
-    });
-
-    flipCardBtn.addEventListener('click', () => {
-      card.classList.toggle('flipped');
     });
   </script>
 </body>
