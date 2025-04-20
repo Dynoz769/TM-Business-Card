@@ -1,290 +1,597 @@
-import { useState, useRef, useEffect } from 'react';
-
-export default function PersistentImageCard() {
-  const [rotation, setRotation] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const cardRef = useRef(null);
-  
-  // State untuk menyimpan gambar yang diupload
-  const [frontImage, setFrontImage] = useState(null);
-  const [backImage, setBackImage] = useState(null);
-  
-  // Referensi untuk input file
-  const frontImageInputRef = useRef(null);
-  const backImageInputRef = useRef(null);
-
-  // Load saved images on component mount
-  useEffect(() => {
-    const savedFrontImage = localStorage.getItem('frontCardImage');
-    const savedBackImage = localStorage.getItem('backCardImage');
-    
-    if (savedFrontImage) {
-      setFrontImage(savedFrontImage);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kartu 360 Derajat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
-    if (savedBackImage) {
-      setBackImage(savedBackImage);
-    }
-  }, []);
-
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setStartX(e.clientX);
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - startX;
-    // Calculate new rotation, but limit it to front (0) or back (180) views
-    let newRotation = rotation + deltaX * 0.5;
-    
-    // If we're closer to 0/360 than to 180, snap to 0/360, otherwise snap to 180
-    if (newRotation % 360 < 90 || newRotation % 360 > 270) {
-      newRotation = Math.round(newRotation / 360) * 360;
-    } else {
-      newRotation = Math.round((newRotation - 180) / 360) * 360 + 180;
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f0f5ff;
+      padding: 20px;
     }
     
-    setRotation(newRotation);
-    setStartX(e.clientX);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    
-    // Snap to either front (0) or back (180) when releasing
-    const normalizedRotation = ((rotation % 360) + 360) % 360;
-    if (normalizedRotation < 90 || normalizedRotation > 270) {
-      setRotation(Math.round(rotation / 360) * 360);
-    } else {
-      setRotation(Math.round((rotation - 180) / 360) * 360 + 180);
-    }
-  };
-
-  const flipCard = () => {
-    const normalizedRotation = ((rotation % 360) + 360) % 360;
-    if (normalizedRotation < 90 || normalizedRotation > 270) {
-      setRotation(rotation + 180);
-    } else {
-      setRotation(rotation - 180);
-    }
-  };
-  
-  // Fungsi untuk menangani upload gambar depan dan menyimpannya
-  const handleFrontImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target.result;
-        setFrontImage(imageData);
-        localStorage.setItem('frontCardImage', imageData);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  // Fungsi untuk menangani upload gambar belakang dan menyimpannya
-  const handleBackImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageData = event.target.result;
-        setBackImage(imageData);
-        localStorage.setItem('backCardImage', imageData);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  // Fungsi untuk menghapus gambar
-  const clearFrontImage = () => {
-    setFrontImage(null);
-    localStorage.removeItem('frontCardImage');
-  };
-  
-  const clearBackImage = () => {
-    setBackImage(null);
-    localStorage.removeItem('backCardImage');
-  };
-
-  // Add and remove event listeners
-  useEffect(() => {
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    } else {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    .container {
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
     }
     
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, startX, rotation]);
-
-  // Calculate which side is currently visible
-  const normalizedRotation = ((rotation % 360) + 360) % 360;
-  const isShowingFront = normalizedRotation < 90 || normalizedRotation > 270;
-
-  return (
-    <div className="w-full h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <h2 className="text-xl font-bold mb-2">Kad Gambar Tersimpan</h2>
-      <p className="text-sm text-gray-600 mb-4">Upload gambar yang akan disimpan secara permanen</p>
-      
-      {/* Upload area */}
-      <div className="flex flex-wrap justify-center gap-4 mb-6">
-        <div className="flex flex-col items-center">
-          <button 
-            onClick={() => frontImageInputRef.current.click()}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-1"
-          >
-            {frontImage ? "Tukar Gambar Depan" : "Upload Gambar Depan"}
-          </button>
-          <input 
-            type="file" 
-            ref={frontImageInputRef}
-            onChange={handleFrontImageUpload}
-            accept="image/*"
-            className="hidden"
-          />
-          {frontImage && (
-            <button 
-              onClick={clearFrontImage}
-              className="text-xs text-red-500 hover:text-red-700 mt-1"
-            >
-              Hapus Gambar
-            </button>
-          )}
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <button 
-            onClick={() => backImageInputRef.current.click()}
-            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 mb-1"
-          >
-            {backImage ? "Tukar Gambar Belakang" : "Upload Gambar Belakang"}
-          </button>
-          <input 
-            type="file" 
-            ref={backImageInputRef}
-            onChange={handleBackImageUpload}
-            accept="image/*"
-            className="hidden"
-          />
-          {backImage && (
-            <button 
-              onClick={clearBackImage}
-              className="text-xs text-red-500 hover:text-red-700 mt-1"
-            >
-              Hapus Gambar
-            </button>
-          )}
-        </div>
+    h1 {
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+    
+    p {
+      margin-bottom: 1.5rem;
+      color: #666;
+    }
+    
+    .upload-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .upload-btn {
+      background-color: #4a6cf7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    
+    .upload-btn:hover {
+      background-color: #3451c6;
+    }
+    
+    .back-upload-btn {
+      background-color: #9c4af7;
+    }
+    
+    .back-upload-btn:hover {
+      background-color: #7834c6;
+    }
+    
+    .delete-btn {
+      font-size: 12px;
+      color: #e74c3c;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    
+    .delete-btn:hover {
+      text-decoration: underline;
+      color: #c0392b;
+    }
+    
+    .card-container {
+      position: relative;
+      width: 280px;
+      height: 400px;
+      margin: 0 auto;
+      perspective: 1500px;
+    }
+    
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.6s ease;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      cursor: grab;
+    }
+    
+    .card.grabbing {
+      cursor: grabbing;
+      transition: none;
+    }
+    
+    .card-side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    
+    .card-front {
+      background: linear-gradient(135deg, #4a6cf7, #4a8ef7);
+      color: white;
+      z-index: 2;
+    }
+    
+    .card-back {
+      background: linear-gradient(135deg, #9c4af7, #c74af7);
+      color: white;
+      transform: rotateY(180deg);
+    }
+    
+    .side-label {
+      position: absolute;
+      bottom: 15px;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    
+    .card-circle {
+      width: 80px;
+      height: 80px;
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-letter {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    
+    .front-letter {
+      color: #4a6cf7;
+    }
+    
+    .back-letter {
+      color: #9c4af7;
+    }
+    
+    .card-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .card-text {
+      font-size: 14px;
+      margin-bottom: 20px;
+      padding: 0 20px;
+      text-align: center;
+    }
+    
+    .image-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    
+    .card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+      color: white;
+    }
+    
+    .upload-btn-card {
+      background-color: white;
+      color: #4a6cf7;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    
+    .back-btn-card {
+      color: #9c4af7;
+    }
+    
+    .controls {
+      margin-top: 30px;
+    }
+    
+    .flip-btn {
+      background-color: #4a6cf7;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      box-shadow: 0 4px 10px rgba(74, 108, 247, 0.3);
+    }
+    
+    .flip-btn:hover {
+      background-color: #3451c6;
+    }
+    
+    .status {
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    
+    .bold {
+      font-weight: 700;
+    }
+    
+    .info {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #777;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Kartu 360 Derajat</h1>
+    <p>Upload gambar untuk kartu dan geser untuk memutar</p>
+    
+    <div class="upload-container">
+      <div>
+        <button class="upload-btn" id="frontUploadBtn">Upload Gambar Depan</button>
+        <button class="delete-btn hidden" id="frontDeleteBtn">Hapus Gambar</button>
+        <input type="file" id="frontFileInput" class="hidden" accept="image/*">
       </div>
       
-      <div className="perspective-500">
-        <div 
-          ref={cardRef}
-          className="w-64 h-96 relative cursor-grab rounded-xl shadow-xl transition-transform duration-300"
-          onMouseDown={handleMouseDown}
-          style={{ 
-            cursor: isDragging ? 'grabbing' : 'grab',
-            transformStyle: 'preserve-3d',
-            transform: `rotateY(${rotation}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.5s ease-out'
-          }}
-        >
-          {/* Front Card */}
-          <div 
-            className="absolute w-full h-full rounded-xl overflow-hidden"
-            style={{ backfaceVisibility: 'hidden', transform: 'translateZ(0.5px)' }}
-          >
-            {frontImage ? (
-              <div className="w-full h-full relative">
-                <img 
-                  src={gambardepan.jpeg} 
-                  alt="Gambar Depan" 
-                  className="absolute w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
-                  <h3 className="font-bold">DEPAN</h3>
-                  <p className="text-xs">Geser untuk melihat belakang</p>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex flex-col items-center justify-center p-4">
-                <div className="w-20 h-20 rounded-full bg-white mb-4 flex items-center justify-center">
-                  <div className="text-blue-500 text-3xl font-bold">D</div>
-                </div>
-                <h3 className="text-white text-2xl font-bold mb-2">DEPAN</h3>
-                <p className="text-white text-center mb-4">Upload gambar anda untuk sisi depan</p>
-                <button 
-                  onClick={() => frontImageInputRef.current.click()}
-                  className="mt-2 px-4 py-2 bg-white text-blue-600 rounded hover:bg-blue-50"
-                >
-                  Upload Gambar
-                </button>
-              </div>
-            )}
-          </div>
-          
-          {/* Back Card */}
-          <div 
-            className="absolute w-full h-full rounded-xl overflow-hidden"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg) translateZ(0.5px)' }}
-          >
-            {backImage ? (
-              <div className="w-full h-full relative">
-                <img 
-                  src={gambarbelakang.jpeg} 
-                  alt="Gambar Belakang" 
-                  className="absolute w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 text-white">
-                  <h3 className="font-bold">BELAKANG</h3>
-                  <p className="text-xs">Geser untuk melihat depan</p>
-                </div>
-              </div>
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600 flex flex-col items-center justify-center p-4">
-                <div className="w-20 h-20 rounded-full bg-white mb-4 flex items-center justify-center">
-                  <div className="text-purple-500 text-3xl font-bold">B</div>
-                </div>
-                <h3 className="text-white text-2xl font-bold mb-2">BELAKANG</h3>
-                <p className="text-white text-center mb-4">Upload gambar anda untuk sisi belakang</p>
-                <button 
-                  onClick={() => backImageInputRef.current.click()}
-                  className="mt-2 px-4 py-2 bg-white text-purple-600 rounded hover:bg-purple-50"
-                >
-                  Upload Gambar
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+      <div>
+        <button class="upload-btn back-upload-btn" id="backUploadBtn">Upload Gambar Belakang</button>
+        <button class="delete-btn hidden" id="backDeleteBtn">Hapus Gambar</button>
+        <input type="file" id="backFileInput" class="hidden" accept="image/*">
       </div>
-      
-      <div className="mt-8 text-center">
-        <p className="text-gray-700 font-medium mb-4">
-          Anda sedang melihat sisi: <span className="font-bold">{isShowingFront ? "DEPAN" : "BELAKANG"}</span>
-        </p>
-        
-        <button 
-          className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow"
-          onClick={flipCard}
-        >
-          Balik Kad
-        </button>
-      </div>
-      
-      <p className="mt-6 text-sm text-gray-500 text-center">
-        Gambar yang diupload akan tersimpan di browser anda dan akan tetap ada meskipun halaman dimuat ulang
-      </p>
     </div>
-  );
-}
+    
+    <div class="card-container">
+      <div class="card" id="card">
+        <!-- Front Side -->
+        <div class="card-side card-front" id="cardFront">
+          <div class="default-front" id="defaultFront">
+            <div class="card-circle">
+              <div class="card-letter front-letter">D</div>
+            </div>
+            <div class="card-title">DEPAN</div>
+            <div class="card-text">Upload gambar untuk tampilan depan</div>
+            <button class="upload-btn-card" id="frontCardBtn">Upload Gambar</button>
+          </div>
+          <div class="image-container hidden" id="frontImageContainer">
+            <img id="frontCardImage" class="card-image" src="gambardepan.jpeg" alt="Gambar Depan">
+            <div class="image-overlay">
+              <div class="side-label">DEPAN</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Back Side -->
+        <div class="card-side card-back" id="cardBack">
+          <div class="default-back" id="defaultBack">
+            <div class="card-circle">
+              <div class="card-letter back-letter">B</div>
+            </div>
+            <div class="card-title">BELAKANG</div>
+            <div class="card-text">Upload gambar untuk tampilan belakang</div>
+            <button class="upload-btn-card back-btn-card" id="backCardBtn">Upload Gambar</button>
+          </div>
+          <div class="image-container hidden" id="backImageContainer">
+            <img id="backCardImage" class="card-image" src="gambarbelakang.jpeg" alt="Gambar Belakang">
+            <div class="image-overlay">
+              <div class="side-label">BELAKANG</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <div class="status">
+        Anda sedang melihat sisi: <span class="bold" id="currentSide">DEPAN</span>
+      </div>
+      <button class="flip-btn" id="flipBtn">Balik Kartu</button>
+    </div>
+    
+    <p class="info">
+      Gambar yang diupload akan tersimpan di browser anda dan akan tetap ada meskipun halaman dimuat ulang
+    </p>
+  </div>
+  
+  <script>
+    // DOM Elements
+    const card = document.getElementById('card');
+    const cardFront = document.getElementById('cardFront');
+    const cardBack = document.getElementById('cardBack');
+    const frontUploadBtn = document.getElementById('frontUploadBtn');
+    const backUploadBtn = document.getElementById('backUploadBtn');
+    const frontFileInput = document.getElementById('frontFileInput');
+    const backFileInput = document.getElementById('backFileInput');
+    const frontCardBtn = document.getElementById('frontCardBtn');
+    const backCardBtn = document.getElementById('backCardBtn');
+    const flipBtn = document.getElementById('flipBtn');
+    const currentSide = document.getElementById('currentSide');
+    const frontCardImage = document.getElementById('frontCardImage');
+    const backCardImage = document.getElementById('backCardImage');
+    const frontImageContainer = document.getElementById('frontImageContainer');
+    const backImageContainer = document.getElementById('backImageContainer');
+    const defaultFront = document.getElementById('defaultFront');
+    const defaultBack = document.getElementById('defaultBack');
+    const frontDeleteBtn = document.getElementById('frontDeleteBtn');
+    const backDeleteBtn = document.getElementById('backDeleteBtn');
+    
+    // Card state
+    let rotationY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let isShowingFront = true;
+    
+    // Initialize the app
+    function init() {
+      // Load saved images
+      loadSavedImages();
+      
+      // Event listeners for buttons
+      frontUploadBtn.addEventListener('click', () => frontFileInput.click());
+      backUploadBtn.addEventListener('click', () => backFileInput.click());
+      frontCardBtn.addEventListener('click', () => frontFileInput.click());
+      backCardBtn.addEventListener('click', () => backFileInput.click());
+      flipBtn.addEventListener('click', flipCard);
+      
+      // File inputs change event
+      frontFileInput.addEventListener('change', handleFrontImageUpload);
+      backFileInput.addEventListener('change', handleBackImageUpload);
+      
+      // Delete buttons
+      frontDeleteBtn.addEventListener('click', clearFrontImage);
+      backDeleteBtn.addEventListener('click', clearBackImage);
+      
+      // Card dragging events
+      card.addEventListener('mousedown', handleMouseDown);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('mousemove', handleMouseMove);
+      
+      // Touch events for mobile
+      card.addEventListener('touchstart', handleTouchStart);
+      document.addEventListener('touchend', handleTouchEnd);
+      document.addEventListener('touchmove', handleTouchMove);
+    }
+    
+    // Load saved images from localStorage
+    function loadSavedImages() {
+      const savedFrontImage = localStorage.getItem('frontCardImage');
+      const savedBackImage = localStorage.getItem('backCardImage');
+      
+      if (savedFrontImage) {
+        frontCardImage.src = savedFrontImage;
+        frontImageContainer.classList.remove('hidden');
+        defaultFront.classList.add('hidden');
+        frontDeleteBtn.classList.remove('hidden');
+        frontUploadBtn.textContent = 'Tukar Gambar Depan';
+      }
+      
+      if (savedBackImage) {
+        backCardImage.src = savedBackImage;
+        backImageContainer.classList.remove('hidden');
+        defaultBack.classList.add('hidden');
+        backDeleteBtn.classList.remove('hidden');
+        backUploadBtn.textContent = 'Tukar Gambar Belakang';
+      }
+    }
+    
+    // Handle front image upload
+    function handleFrontImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageData = event.target.result;
+          frontCardImage.src = imageData;
+          frontImageContainer.classList.remove('hidden');
+          defaultFront.classList.add('hidden');
+          frontDeleteBtn.classList.remove('hidden');
+          frontUploadBtn.textContent = 'Tukar Gambar Depan';
+          
+          // Save to localStorage
+          localStorage.setItem('frontCardImage', imageData);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Handle back image upload
+    function handleBackImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageData = event.target.result;
+          backCardImage.src = imageData;
+          backImageContainer.classList.remove('hidden');
+          defaultBack.classList.add('hidden');
+          backDeleteBtn.classList.remove('hidden');
+          backUploadBtn.textContent = 'Tukar Gambar Belakang';
+          
+          // Save to localStorage
+          localStorage.setItem('backCardImage', imageData);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Clear front image
+    function clearFrontImage() {
+      frontCardImage.src = '';
+      frontImageContainer.classList.add('hidden');
+      defaultFront.classList.remove('hidden');
+      frontDeleteBtn.classList.add('hidden');
+      frontUploadBtn.textContent = 'Upload Gambar Depan';
+      
+      // Remove from localStorage
+      localStorage.removeItem('frontCardImage');
+    }
+    
+    // Clear back image
+    function clearBackImage() {
+      backCardImage.src = '';
+      backImageContainer.classList.add('hidden');
+      defaultBack.classList.remove('hidden');
+      backDeleteBtn.classList.add('hidden');
+      backUploadBtn.textContent = 'Upload Gambar Belakang';
+      
+      // Remove from localStorage
+      localStorage.removeItem('backCardImage');
+    }
+    
+    // Handle mouse down
+    function handleMouseDown(e) {
+      e.preventDefault();
+      isDragging = true;
+      startX = e.clientX || e.touches[0].clientX;
+      card.classList.add('grabbing');
+    }
+    
+    // Handle touch start
+    function handleTouchStart(e) {
+      isDragging = true;
+      startX = e.touches[0].clientX;
+      card.classList.add('grabbing');
+    }
+    
+    // Handle mouse move
+    function handleMouseMove(e) {
+      if (!isDragging) return;
+      
+      const currentX = e.clientX || e.touches[0].clientX;
+      const deltaX = currentX - startX;
+      
+      // Calculate new rotation, limit to front (0/360) or back (180)
+      let newRotation = rotationY + deltaX * 0.5;
+      
+      // Update card rotation
+      updateCardRotation(newRotation);
+      
+      // Update start position
+      startX = currentX;
+    }
+    
+    // Handle touch move
+    function handleTouchMove(e) {
+      if (!isDragging) return;
+      handleMouseMove(e);
+    }
+    
+    // Handle mouse up/touch end
+    function handleMouseUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      card.classList.remove('grabbing');
+      
+      // Snap to either front (0) or back (180)
+      snapToSide();
+    }
+    
+    // Handle touch end
+    function handleTouchEnd() {
+      handleMouseUp();
+    }
+    
+    // Snap card to front or back side
+    function snapToSide() {
+      const normalizedRotation = ((rotationY % 360) + 360) % 360;
+      
+      if (normalizedRotation < 90 || normalizedRotation > 270) {
+        // Snap to front
+        rotationY = Math.round(rotationY / 360) * 360;
+        isShowingFront = true;
+        currentSide.textContent = 'DEPAN';
+      } else {
+        // Snap to back
+        rotationY = Math.round((rotationY - 180) / 360) * 360 + 180;
+        isShowingFront = false;
+        currentSide.textContent = 'BELAKANG';
+      }
+      
+      updateCardRotation(rotationY, true);
+    }
+    
+    // Flip card function
+    function flipCard() {
+      if (isShowingFront) {
+        rotationY += 180;
+        isShowingFront = false;
+        currentSide.textContent = 'BELAKANG';
+      } else {
+        rotationY -= 180;
+        isShowingFront = true;
+        currentSide.textContent = 'DEPAN';
+      }
+      
+      updateCardRotation(rotationY, true);
+    }
+    
+    // Update card rotation
+    function updateCardRotation(newRotation, animate = false) {
+      rotationY = newRotation;
+      
+      // If animate is false, remove transition temporarily
+      if (!animate) {
+        card.style.transition = 'none';
+      } else {
+        card.style.transition = 'transform 0.6s ease';
+      }
+      
+      // Apply rotation
+      card.style.transform = `rotateY(${rotationY}deg)`;
+      
+      // Update side indicator
+      const normalizedRotation = ((rotationY % 360) + 360) % 360;
+      if (normalizedRotation < 90 || normalizedRotation > 270) {
+        isShowingFront = true;
+        currentSide.textContent = 'DEPAN';
+      } else {
+        isShowingFront = false;
+        currentSide.textContent = 'BELAKANG';
+      }
+    }
+    
+    // Start the app
+    init();
+  </script>
+</body>
+</html>
