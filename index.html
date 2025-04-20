@@ -38,51 +38,6 @@
       color: #666;
     }
     
-    .upload-container {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
-    
-    .upload-btn {
-      background-color: #4a6cf7;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-    
-    .upload-btn:hover {
-      background-color: #3451c6;
-    }
-    
-    .back-upload-btn {
-      background-color: #9c4af7;
-    }
-    
-    .back-upload-btn:hover {
-      background-color: #7834c6;
-    }
-    
-    .delete-btn {
-      font-size: 12px;
-      color: #e74c3c;
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-    
-    .delete-btn:hover {
-      text-decoration: underline;
-      color: #c0392b;
-    }
-    
     .card-container {
       position: relative;
       width: 280px;
@@ -142,44 +97,6 @@
       font-size: 12px;
     }
     
-    .card-circle {
-      width: 80px;
-      height: 80px;
-      background-color: white;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 20px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card-letter {
-      font-size: 36px;
-      font-weight: bold;
-    }
-    
-    .front-letter {
-      color: #4a6cf7;
-    }
-    
-    .back-letter {
-      color: #9c4af7;
-    }
-    
-    .card-title {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    
-    .card-text {
-      font-size: 14px;
-      margin-bottom: 20px;
-      padding: 0 20px;
-      text-align: center;
-    }
-    
     .image-container {
       position: absolute;
       top: 0;
@@ -204,22 +121,6 @@
       padding: 10px;
       background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
       color: white;
-    }
-    
-    .upload-btn-card {
-      background-color: white;
-      color: #4a6cf7;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      margin-top: 10px;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-    
-    .back-btn-card {
-      color: #9c4af7;
     }
     
     .controls {
@@ -265,36 +166,14 @@
 <body>
   <div class="container">
     <h1>Kartu 360 Derajat</h1>
-    <p>Upload gambar untuk kartu dan geser untuk memutar</p>
-    
-    <div class="upload-container">
-      <div>
-        <button class="upload-btn" id="frontUploadBtn">Upload Gambar Depan</button>
-        <button class="delete-btn hidden" id="frontDeleteBtn">Hapus Gambar</button>
-        <input type="file" id="frontFileInput" class="hidden" accept="image/*">
-      </div>
-      
-      <div>
-        <button class="upload-btn back-upload-btn" id="backUploadBtn">Upload Gambar Belakang</button>
-        <button class="delete-btn hidden" id="backDeleteBtn">Hapus Gambar</button>
-        <input type="file" id="backFileInput" class="hidden" accept="image/*">
-      </div>
-    </div>
+    <p>Geser untuk memutar kartu</p>
     
     <div class="card-container">
       <div class="card" id="card">
         <!-- Front Side -->
         <div class="card-side card-front" id="cardFront">
-          <div class="default-front" id="defaultFront">
-            <div class="card-circle">
-              <div class="card-letter front-letter">D</div>
-            </div>
-            <div class="card-title">DEPAN</div>
-            <div class="card-text">Upload gambar untuk tampilan depan</div>
-            <button class="upload-btn-card" id="frontCardBtn">Upload Gambar</button>
-          </div>
-          <div class="image-container hidden" id="frontImageContainer">
-            <img id="frontCardImage" class="card-image" src="gambardepan.jpeg" alt="Gambar Depan">
+          <div class="image-container" id="frontImageContainer">
+            <img id="frontCardImage" class="card-image" src="" alt="Gambar Depan">
             <div class="image-overlay">
               <div class="side-label">DEPAN</div>
             </div>
@@ -303,16 +182,8 @@
         
         <!-- Back Side -->
         <div class="card-side card-back" id="cardBack">
-          <div class="default-back" id="defaultBack">
-            <div class="card-circle">
-              <div class="card-letter back-letter">B</div>
-            </div>
-            <div class="card-title">BELAKANG</div>
-            <div class="card-text">Upload gambar untuk tampilan belakang</div>
-            <button class="upload-btn-card back-btn-card" id="backCardBtn">Upload Gambar</button>
-          </div>
-          <div class="image-container hidden" id="backImageContainer">
-            <img id="backCardImage" class="card-image" src="gambarbelakang.jpeg" alt="Gambar Belakang">
+          <div class="image-container" id="backImageContainer">
+            <img id="backCardImage" class="card-image" src="" alt="Gambar Belakang">
             <div class="image-overlay">
               <div class="side-label">BELAKANG</div>
             </div>
@@ -329,31 +200,17 @@
     </div>
     
     <p class="info">
-      Gambar yang diupload akan tersimpan di browser anda dan akan tetap ada meskipun halaman dimuat ulang
+      Geser kartu ke kiri atau kanan untuk memutar
     </p>
   </div>
   
   <script>
     // DOM Elements
     const card = document.getElementById('card');
-    const cardFront = document.getElementById('cardFront');
-    const cardBack = document.getElementById('cardBack');
-    const frontUploadBtn = document.getElementById('frontUploadBtn');
-    const backUploadBtn = document.getElementById('backUploadBtn');
-    const frontFileInput = document.getElementById('frontFileInput');
-    const backFileInput = document.getElementById('backFileInput');
-    const frontCardBtn = document.getElementById('frontCardBtn');
-    const backCardBtn = document.getElementById('backCardBtn');
-    const flipBtn = document.getElementById('flipBtn');
-    const currentSide = document.getElementById('currentSide');
     const frontCardImage = document.getElementById('frontCardImage');
     const backCardImage = document.getElementById('backCardImage');
-    const frontImageContainer = document.getElementById('frontImageContainer');
-    const backImageContainer = document.getElementById('backImageContainer');
-    const defaultFront = document.getElementById('defaultFront');
-    const defaultBack = document.getElementById('defaultBack');
-    const frontDeleteBtn = document.getElementById('frontDeleteBtn');
-    const backDeleteBtn = document.getElementById('backDeleteBtn');
+    const flipBtn = document.getElementById('flipBtn');
+    const currentSide = document.getElementById('currentSide');
     
     // Card state
     let rotationY = 0;
@@ -363,23 +220,11 @@
     
     // Initialize the app
     function init() {
-      // Load saved images
-      loadSavedImages();
+      // Load images from localhost
+      loadImagesFromLocalhost();
       
-      // Event listeners for buttons
-      frontUploadBtn.addEventListener('click', () => frontFileInput.click());
-      backUploadBtn.addEventListener('click', () => backFileInput.click());
-      frontCardBtn.addEventListener('click', () => frontFileInput.click());
-      backCardBtn.addEventListener('click', () => backFileInput.click());
+      // Event listener for flip button
       flipBtn.addEventListener('click', flipCard);
-      
-      // File inputs change event
-      frontFileInput.addEventListener('change', handleFrontImageUpload);
-      backFileInput.addEventListener('change', handleBackImageUpload);
-      
-      // Delete buttons
-      frontDeleteBtn.addEventListener('click', clearFrontImage);
-      backDeleteBtn.addEventListener('click', clearBackImage);
       
       // Card dragging events
       card.addEventListener('mousedown', handleMouseDown);
@@ -392,90 +237,25 @@
       document.addEventListener('touchmove', handleTouchMove);
     }
     
-    // Load saved images from localStorage
-    function loadSavedImages() {
-      const savedFrontImage = localStorage.getItem('frontCardImage');
-      const savedBackImage = localStorage.getItem('backCardImage');
+    // Load images from localhost
+    function loadImagesFromLocalhost() {
+      // Replace these paths with your actual localhost image paths
+      const frontImagePath = '/images/front.jpg';
+      const backImagePath = '/images/back.jpg';
       
-      if (savedFrontImage) {
-        frontCardImage.src = savedFrontImage;
-        frontImageContainer.classList.remove('hidden');
-        defaultFront.classList.add('hidden');
-        frontDeleteBtn.classList.remove('hidden');
-        frontUploadBtn.textContent = 'Tukar Gambar Depan';
-      }
+      frontCardImage.src = frontImagePath;
+      backCardImage.src = backImagePath;
       
-      if (savedBackImage) {
-        backCardImage.src = savedBackImage;
-        backImageContainer.classList.remove('hidden');
-        defaultBack.classList.add('hidden');
-        backDeleteBtn.classList.remove('hidden');
-        backUploadBtn.textContent = 'Tukar Gambar Belakang';
-      }
-    }
-    
-    // Handle front image upload
-    function handleFrontImageUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imageData = event.target.result;
-          frontCardImage.src = imageData;
-          frontImageContainer.classList.remove('hidden');
-          defaultFront.classList.add('hidden');
-          frontDeleteBtn.classList.remove('hidden');
-          frontUploadBtn.textContent = 'Tukar Gambar Depan';
-          
-          // Save to localStorage
-          localStorage.setItem('frontCardImage', imageData);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-    
-    // Handle back image upload
-    function handleBackImageUpload(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imageData = event.target.result;
-          backCardImage.src = imageData;
-          backImageContainer.classList.remove('hidden');
-          defaultBack.classList.add('hidden');
-          backDeleteBtn.classList.remove('hidden');
-          backUploadBtn.textContent = 'Tukar Gambar Belakang';
-          
-          // Save to localStorage
-          localStorage.setItem('backCardImage', imageData);
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-    
-    // Clear front image
-    function clearFrontImage() {
-      frontCardImage.src = '';
-      frontImageContainer.classList.add('hidden');
-      defaultFront.classList.remove('hidden');
-      frontDeleteBtn.classList.add('hidden');
-      frontUploadBtn.textContent = 'Upload Gambar Depan';
+      // Handle image load errors
+      frontCardImage.onerror = function() {
+        console.error('Failed to load front image from localhost');
+        frontCardImage.src = 'gambardepan.jpeg';
+      };
       
-      // Remove from localStorage
-      localStorage.removeItem('frontCardImage');
-    }
-    
-    // Clear back image
-    function clearBackImage() {
-      backCardImage.src = '';
-      backImageContainer.classList.add('hidden');
-      defaultBack.classList.remove('hidden');
-      backDeleteBtn.classList.add('hidden');
-      backUploadBtn.textContent = 'Upload Gambar Belakang';
-      
-      // Remove from localStorage
-      localStorage.removeItem('backCardImage');
+      backCardImage.onerror = function() {
+        console.error('Failed to load back image from localhost');
+        backCardImage.src = 'gambarbelakang.jpeg';
+      };
     }
     
     // Handle mouse down
